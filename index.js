@@ -1,6 +1,6 @@
 'use strict'
 
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 4000
 
 const https = require('https');
 const fs = require('fs');
@@ -58,22 +58,29 @@ app.get('/api', (req, res, next) => {
     });
 });
 
-app.get('/api/:coleccion', (req, res, next) => {
+app.get('/api/user', (req, res, next) => {
     db.user.find((err, coleccion) => {
         if(err) return next(err);
         res.json(coleccion);
     });
 });
 
-app.get('/api/:coleccion/:id', (req, res, next) => {
+app.get('/api/user/:id', (req, res, next) => {
     db.user.findOne({_id: id(req.params.id) }, (err, elemento) => {
         if(err) return next(err);
         res.json(elemento);
     });
 });
 
+app.get('/api/auth', (req, res, next) => {
+    db.user.find((err, coleccion) => {
+        if(err) return next(err);
+        res.json(coleccion);
+    });
+});
+
 //POST
-app.post('/api/:coleccion', auth, (req, res, next) => {
+app.post('/api/user', auth, (req, res, next) => {
     const elemento = req.body;
 
     if(!elemento.nombre) {
@@ -90,7 +97,7 @@ app.post('/api/:coleccion', auth, (req, res, next) => {
 });
 
 //PUT
-app.put('/api/:coleccion/:id', auth, (req, res, next) => {
+app.put('/api/user/:id', auth, (req, res, next) => {
     let elementoId = req.params.id;
     let elementoNuevo = req.body;
     db.user.update({_id: id(elementoId)},
@@ -101,7 +108,7 @@ app.put('/api/:coleccion/:id', auth, (req, res, next) => {
 });
 
 //DELETE
-app.delete('/api/:coleccion/:id', auth, (req, res, next) => {
+app.delete('/api/user/:id', auth, (req, res, next) => {
     let elementoId = req.params.id;
 
     db.user.remove({_id: id(elementoId)}, (err, resultado) => {

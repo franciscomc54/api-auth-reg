@@ -18,6 +18,10 @@ const cors = require('cors');
 
 const app = express();
 
+const PassService = require('../auth-test/services/pass.service');
+const TokenService = require('../auth-test/services/token.service')
+const moment = require('moment');
+
 var db = mongojs("SD");
 var id = mongojs.ObjectId;
 
@@ -80,6 +84,25 @@ app.get('/api/auth', (req, res, next) => {
 });
 
 //POST
+//signup
+/*
+body:
+    "name": "Paco Maciá"
+    "email": pmacia@dtic.ua.es
+    "pass":"1234"
+
+respuesta:
+    "result": "OK",
+    "token": "kjasdhfjlekjfoiaj...",
+    "usuario": {
+        "email": "pmacia@dtic.ua.es",
+        "displayName": Paco Maciá",
+        "password": "$2alskdjfoijelskdjfojalñskjfo",
+        "signupDate": 1604428206,
+        "lastLogin"; 1604428206,
+        "_id": "5fa4ds548494d58c4fe8d"
+    }
+*/
 app.post('/api/user', auth, (req, res, next) => {
     const elemento = req.body;
 
@@ -89,7 +112,48 @@ app.post('/api/user', auth, (req, res, next) => {
             description: 'Se precisa al menos un campo <nombre>'
         });
     } else {
-        db.user.save(elemento, (err, coleccionGuardada) => {
+        const coleccion = {
+            "email": req.body.email,
+            "displayName": req.body.nombre,
+            "password": PassService.encriptaPassword(req.body.password),
+            "signupDate": moment().unix(),
+            "lastLogin": moment().unix()
+        }
+        db.user.save(elemento, (err, coleccion) => {
+            if(err) return next(err);
+            res.json(coleccion);
+        });
+    }
+});
+
+//signin
+/*
+body:
+    "email": pmacia@dtic.ua.es
+    "pass":"1234"
+
+respuesta:
+    "result": "OK",
+    "token": "kjasdhfjlekjfoiaj...",
+    "usuario": {
+        "email": "pmacia@dtic.ua.es",
+        "displayName": Paco Maciá",
+        "password": "$2alskdjfoijelskdjfojalñskjfo",
+        "signupDate": 1604428206,
+        "lastLogin"; 1604428206,
+        "_id": "5fa4ds548494d58c4fe8d"
+    }
+*/
+app.post('/api/auth', auth, (req, res, next) => {
+    const elemento = req.body;
+
+    if(!elemento.nombre) {
+        res.status(400).json({
+            error: 'Bad data',
+            description: 'Se precisa al menos un campo <nombre>'
+        });
+    } else {
+        db.auth.save(elemento, (err, coleccionGuardada) => {
             if(err) return next(err);
             res.json(coleccionGuardada);
         });
